@@ -1,0 +1,41 @@
+version: "3"
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # image: frontend
+    stdin_open: true
+    ports:
+      - "3001:3001"
+    networks:
+      - url-shortener
+  api-server:
+    image: api-server
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI= mongodb://mongo:27017
+      - DB_NAME= url-shortener
+    networks:
+      - url-shortener
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:3.6.19-xenial
+    container_name: url_db
+    ports:
+      - "27017:27017"
+    networks:
+      - url-shortener
+    volumes:
+      - mongo-data:/data/db
+networks:
+  url-shortener:
+    driver: bridge
+volumes:
+  mongo-data:
+    driver: local
